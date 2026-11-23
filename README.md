@@ -13,4 +13,4 @@ Genera di nuovo dalla cartella progetto:
 python export_static_site.py
 ```
 
-Esportato: 2026-11-23T18:53:36.671360+00:00
+Esportato: 2026-11-23T18:55:07.341522+00:00
