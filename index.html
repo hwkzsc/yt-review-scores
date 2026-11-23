@@ -252,8 +252,12 @@
     let chunksLoaded = 0;
 
     async function loadAllData() {
-      const meta = await fetch("./data/meta.json").then((r) => r.json());
+      const [meta, events] = await Promise.all([
+        fetch("./data/meta.json").then((r) => r.json()),
+        fetch("./data/score_events.json").then((r) => r.json()),
+      ]);
       Object.assign(DATA, meta);
+      DATA.score_events = events;
       const idx = await fetch("./data/chunks.json").then((r) => r.json());
       const paths = idx.files || [];
       const chunks = await Promise.all(
