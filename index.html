@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Frusciante — archivio offline</title>
+  <style>
+
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f5f5f5;
+      --muted: #888;
+      --line: #2a2a2a;
+      --hover: #161616;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.45;
+    font-size: 15px;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+  header {
+    border-bottom: 1px solid var(--fg);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .sub {
+    margin: 0.35rem 0 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+  label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  select, input[type="search"] {
+    border: 1px solid var(--line);
+    background: #000;
+    color: var(--fg);
+    padding: 0.4rem 0.5rem;
+    font: inherit;
+    border-radius: 0;
+  }
+  input[type="search"] {
+    flex: 1;
+    min-width: 12rem;
+  }
+  select:focus, input:focus {
+    outline: 2px solid var(--fg);
+    outline-offset: 1px;
+    border-color: var(--fg);
+  }
+  select option {
+    background: #000;
+    color: var(--fg);
+  }
+  .stats {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    border-bottom: 2px solid var(--fg);
+    padding: 0.5rem 0.35rem;
+  }
+  th.num { text-align: right; width: 4.5rem; }
+  td {
+    border-bottom: 1px solid var(--line);
+    padding: 0.85rem 0.35rem;
+    vertical-align: top;
+  }
+  td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  tr:hover td { background: var(--hover); }
+  .film { font-weight: 500; }
+  .cat {
+    display: inline-block;
+    margin-left: 0.5rem;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--fg);
+    border: 1px solid var(--line);
+    padding: 0.1rem 0.35rem;
+    vertical-align: middle;
+  }
+  .year {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 0.9em;
+  }
+  .live {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+  .live strong { color: var(--fg); font-weight: 600; }
+  .live .on { color: #9f9; }
+  .note {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    max-width: 42em;
+  }
+  .trama {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+    color: #bbb;
+    max-width: 42em;
+  }
+  a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  a:hover { text-decoration-thickness: 2px; }
+  .empty, .err {
+    padding: 2rem 0;
+    color: var(--muted);
+    text-align: center;
+  }
+  .err { color: var(--fg); border: 1px solid var(--fg); padding: 1rem; }
+  .pending { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+  #sentinel { height: 1px; margin: 2rem 0; }
+  .loadmore { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 1rem 0; }
+  @media (max-width: 520px) {
+    .hide-sm { display: none; }
+    .stats { width: 100%; margin-left: 0; }
+  }
+  
+  .sub code { font-size: 0.75rem; color: var(--muted); }
+  details.meta {
+    margin-top: 0.45rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  details.meta summary {
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  details.meta pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 14rem;
+    overflow: auto;
+    border: 1px solid var(--line);
+    padding: 0.5rem;
+    margin: 0.35rem 0 0;
+    background: #000;
+    font-size: 0.68rem;
+  }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Frusciante — archivio offline</h1>
+      <p class="sub" id="sub">Sito statico · dati in chunk JSON</p>
+    </header>
+    <p class="live" id="live"></p>
+    <div class="toolbar">
+      <div>
+        <label for="sort">Ordina</label><br />
+        <select id="sort" aria-label="Ordina">
+          <option value="score-desc">Punteggio · alto → basso</option>
+          <option value="score-asc">Punteggio · basso → alto</option>
+          <option value="name-asc">Titolo · A → Z</option>
+          <option value="name-desc">Titolo · Z → A</option>
+          <option value="year-desc">Anno · recente</option>
+          <option value="year-asc">Anno · meno recente</option>
+          <option value="date-desc">Valutato · recente</option>
+          <option value="category-asc">Categoria · A → Z</option>
+        </select>
+      </div>
+      <div>
+        <label for="filter">Mostra</label><br />
+        <select id="filter" aria-label="Filtro elenco">
+          <option value="all">Tutti (catalogo)</option>
+          <option value="scored">Solo con voto</option>
+          <option value="pending">In attesa di voto</option>
+        </select>
+      </div>
+      <div style="flex:1; min-width:10rem">
+        <label for="q">Cerca</label><br />
+        <input id="q" type="search" placeholder="Titolo, trama, transcript…" autocomplete="off" />
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <table id="grid" hidden>
+      <thead>
+        <tr>
+          <th class="num">Voto</th>
+          <th>Film</th>
+          <th class="hide-sm">Categoria</th>
+          <th class="hide-sm num">Fid.</th>
+        </tr>
+      </thead>
+      <tbody id="body"></tbody>
+    </table>
+    <p class="loadmore" id="loadmore" hidden>Scorri per caricare altri…</p>
+    <div id="sentinel"></div>
+    <p class="empty" id="loading">Caricamento…</p>
+    <p class="empty" id="empty" hidden>Nessun risultato.</p>
+  </div>
+  <script>
+    /* data loaded from ./data/chunks/ */
+  </script>
+  <script>
+    
+    const DATA = { rows: [], meta: {}, progress: {}, score_events: [] };
+    let chunksLoaded = 0;
+
+    async function loadAllData() {
+      const meta = await fetch("./data/meta.json").then((r) => r.json());
+      Object.assign(DATA, meta);
+      const idx = await fetch("./data/chunks.json").then((r) => r.json());
+      const paths = idx.files || [];
+      const chunks = await Promise.all(
+        paths.map((p) => fetch("./data/chunks/" + p).then((r) => r.json()))
+      );
+      for (const part of chunks) DATA.rows.push(...part);
+      chunksLoaded = paths.length;
+      return DATA;
+    }
+    
+    let ALL_ROWS = [];
+
+    const PAGE = 100;
+    let filtered = [];
+    let offset = 0;
+    let total = 0;
+    let hasMore = true;
+    let loading = false;
+    let displayed = 0;
+    let searchTimer = null;
+
+    function youtubeUrl(id) {
+      return "https://www.youtube.com/watch?v=" + encodeURIComponent(id);
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function compare(sort) {
+      switch (sort) {
+        case "score-asc":
+          return (a, b) => (a.score ?? -1) - (b.score ?? -1) || (a.movie_name || "").localeCompare(b.movie_name || "");
+        case "name-asc":
+          return (a, b) => (a.movie_name || "").localeCompare(b.movie_name || "");
+        case "name-desc":
+          return (a, b) => (b.movie_name || "").localeCompare(a.movie_name || "");
+        case "year-desc":
+          return (a, b) => (b.year || 0) - (a.year || 0) || (b.score ?? -1) - (a.score ?? -1);
+        case "year-asc":
+          return (a, b) => (a.year || 9999) - (b.year || 9999);
+        case "date-desc":
+          return (a, b) => (b.scored_at || "").localeCompare(a.scored_at || "");
+        case "category-asc":
+          return (a, b) => (a.category || "").localeCompare(b.category || "") || (b.score ?? -1) - (a.score ?? -1);
+        default:
+          return (a, b) => ((b.has_score ? 1 : 0) - (a.has_score ? 1 : 0)) || ((b.score ?? -1) - (a.score ?? -1)) || (a.movie_name || "").localeCompare(b.movie_name || "");
+      }
+    }
+
+    function applyFilters() {
+      const sort = document.getElementById("sort").value;
+      const q = document.getElementById("q").value.trim().toLowerCase();
+      const filt = document.getElementById("filter").value;
+      let list = ALL_ROWS.slice();
+      if (filt === "scored") list = list.filter((r) => r.has_score);
+      else if (filt === "pending") list = list.filter((r) => !r.has_score);
+      if (q) {
+        list = list.filter((r) => {
+          const tx = (r.transcript && (r.transcript.plain_text || "")) || "";
+          const hay = [
+            r.movie_name, r.youtube_title, r.one_line_rationale, r.category,
+            r.trama_senza_spoiler, r.video_id, tx.slice(0, 4000),
+          ].filter(Boolean).join(" ").toLowerCase();
+          return hay.includes(q);
+        });
+      }
+      list.sort(compare(sort));
+      return list;
+    }
+
+    function rowHtml(r) {
+      const conf = r.confidence != null ? (Number(r.confidence) * 100).toFixed(0) + "%" : "—";
+      const scoreCell = r.has_score
+        ? Number(r.score).toFixed(1)
+        : '<span class="pending">—</span>';
+      const label = r.has_score ? (r.movie_name || "?") : (r.youtube_title || r.video_id).slice(0, 80);
+      const raw = JSON.stringify(r, null, 2);
+      return (
+        "<tr>" +
+        '<td class="num">' + scoreCell + "</td>" +
+        '<td><span class="film"><a href="' + youtubeUrl(r.video_id) + '" target="_blank" rel="noopener">' +
+        escapeHtml(label) + "</a></span>" +
+        (r.year ? ' <span class="year">' + r.year + "</span>" : "") +
+        (r.category ? ' <span class="cat">' + escapeHtml(r.category) + "</span>" : "") +
+        (!r.transcript_saved ? ' <span class="cat">no tr.</span>' : "") +
+        (r.trama_senza_spoiler ? '<span class="trama">' + escapeHtml(r.trama_senza_spoiler) + "</span>" : "") +
+        (r.one_line_rationale ? '<span class="note">' + escapeHtml(r.one_line_rationale) + "</span>" : "") +
+        '<details class="meta"><summary>Dati completi (JSON)</summary><pre>' +
+        escapeHtml(raw) + "</pre></details>" +
+        "</td>" +
+        '<td class="hide-sm">' + escapeHtml(r.category || "—") + "</td>" +
+        '<td class="num hide-sm">' + conf + "</td>" +
+        "</tr>"
+      );
+    }
+
+    function appendPage() {
+      const slice = filtered.slice(offset, offset + PAGE);
+      if (!slice.length) {
+        hasMore = false;
+        return;
+      }
+      const body = document.getElementById("body");
+      const tmp = document.createElement("tbody");
+      tmp.innerHTML = slice.map(rowHtml).join("");
+      while (tmp.firstChild) body.appendChild(tmp.firstChild);
+      offset += slice.length;
+      displayed += slice.length;
+      hasMore = offset < filtered.length;
+      document.getElementById("stats").textContent = displayed + " / " + total + " · " + PAGE + " per scroll";
+      document.getElementById("grid").hidden = displayed === 0;
+      document.getElementById("empty").hidden = displayed > 0;
+      document.getElementById("loadmore").hidden = !hasMore;
+      document.getElementById("loadmore").textContent = hasMore
+        ? "Scorri per altri " + PAGE + "…"
+        : "Fine elenco.";
+    }
+
+    function resetList() {
+      filtered = applyFilters();
+      total = filtered.length;
+      offset = 0;
+      displayed = 0;
+      hasMore = true;
+      loading = false;
+      document.getElementById("body").innerHTML = "";
+      appendPage();
+    }
+
+    function initHeader() {
+      const m = DATA.meta || {};
+      const p = DATA.progress || {};
+      document.getElementById("sub").innerHTML =
+        "Esportato <code>" + escapeHtml(m.exported_at || "") + "</code> · " +
+        (m.with_transcripts ? "con transcript integrati" : "solo metadati transcript");
+      document.getElementById("live").innerHTML =
+        "<strong>Catalogo</strong> " + (p.catalog_total || total) +
+        " · <strong>Transcript</strong> " + (p.transcripts_done || 0) +
+        " · <strong>Voti</strong> " + (p.scores_done || 0) +
+        " · <strong>Eventi score</strong> " + ((DATA.score_events || []).length);
+    }
+
+    async function init() {
+      document.getElementById('loading').textContent = 'Carico archivio…';
+      await loadAllData();
+      ALL_ROWS = DATA.rows;
+      initHeader();
+      resetList();
+      document.getElementById("loading").hidden = true;
+      new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && !loading && hasMore) {
+          loading = true;
+          appendPage();
+          loading = false;
+        }
+      }, { rootMargin: "400px" }).observe(document.getElementById("sentinel"));
+      document.getElementById("sort").addEventListener("change", resetList);
+      document.getElementById("filter").addEventListener("change", resetList);
+      document.getElementById("q").addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(resetList, 300);
+      });
+    }
+    init();
+  </script>
+</body>
+</html>
